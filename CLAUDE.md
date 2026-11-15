@@ -16,6 +16,12 @@ Antes de qualquer tarefa, leia:
 
 Se uma tarefa entrar em conflito com `docs/DECISOES.md`, pare e pergunte. Não decida sozinho.
 
+## Testes manuais
+
+- Antes de pedir um teste manual ao usuário, prepare tudo o que não exige clique: crie as pastas, gere o build e abra o app no Edge.
+- Passe ao usuário um roteiro curto, só com o que exige clique ou decisão dele, com os caminhos exatos.
+- Quando ele disser "terminei", confira os arquivos e o banco e informe o resultado.
+
 ## Regras de privacidade (inegociáveis)
 
 - O repositório é PÚBLICO. Nunca coloque nomes de funcionários, clientes ou centros de custo reais em código, testes, docs, commits ou mensagens.
@@ -33,12 +39,13 @@ Se uma tarefa entrar em conflito com `docs/DECISOES.md`, pare e pergunte. Não d
 - Bibliotecas de terceiros ficam em `vendor/`, com a versão anotada em `vendor/VERSOES.md`. Nada é carregado da internet quando o app roda.
 - Build: `python scripts/build.py` junta `app/` e `vendor/` num arquivo único `dist/controle_ferias.html` (bibliotecas e wasm embutidos).
 - Python (3.11+) só para ferramentas de desenvolvimento: build, dados fictícios e testes de dados.
-- Modelo de dados: `sql/schema.sql` (será revisado na Fase 1).
+- Modelo de dados: migrações em `sql/migracoes/NNN_nome.sql`, numeradas em sequência (D38). Mudança de estrutura = migração nova; nunca edite uma migração já publicada. O `scripts/referencia/schema_v0.sql` é só consulta.
+- Migrações não podem ter `BEGIN`/`COMMIT`: o app aplica todas numa transação e grava o `PRAGMA user_version`.
 
 ## Convenções
 
 - Nomes de tabelas, colunas, funções e textos da interface em português.
-- Datas gravadas como texto ISO (AAAA-MM-DD) e exibidas como dd/mm/aaaa.
+- Datas gravadas como texto ISO (AAAA-MM-DD) e exibidas como dd/mm/aaaa. Data e hora gravadas em UTC (`AAAA-MM-DDTHH:MM:SSZ`) e exibidas no horário de Brasília (D37). Para exibir, use sempre `Datas.formatar` (`app/js/datas.js`).
 - Toda alteração feita pelo app (cadastro, edição, desligamento) grava em `historico_alteracao`.
 - Funcionário que sai é "desligado" (ativo = 0), não apagado.
 - O app avisa, não bloqueia: regras quebradas viram alerta e o gestor decide (D26).
@@ -47,9 +54,12 @@ Se uma tarefa entrar em conflito com `docs/DECISOES.md`, pare e pergunte. Não d
 ## Comandos
 
 ```bash
-python scripts/gerar_dados_ficticios.py   # planilha fictícia em data/exemplo/
+python scripts/gerar_dados_ficticios.py   # planilha e cadastro fictícios em data/exemplo/ (precisa de requirements-dev.txt)
 python scripts/build.py                   # gera dist/controle_ferias.html
+python tests/rodar_testes.py              # testes automáticos (Edge ou Chrome sem janela); ver tests/README.md
 ```
+
+Rode os testes antes de propor qualquer commit.
 
 ## Entregas para o gestor
 

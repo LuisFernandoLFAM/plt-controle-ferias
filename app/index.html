@@ -10,7 +10,12 @@
 <body>
 <header class="topo">
   <h1>Controle de Férias</h1>
-  <p class="subtitulo">Fase 0: teste de gravação do banco</p>
+  <nav id="menu" class="menu" hidden>
+    <button type="button" data-tela="funcionarios">Funcionários</button>
+    <button type="button" data-tela="times">Times</button>
+    <button type="button" data-tela="substitutos">Substitutos</button>
+    <button type="button" data-tela="historico">Histórico</button>
+  </nav>
 </header>
 
 <main>
@@ -43,22 +48,100 @@
     </div>
   </section>
 
-  <section id="tela-clientes" class="tela" hidden>
-    <h2>Clientes</h2>
-    <form id="form-cliente" class="linha-form" autocomplete="off">
-      <label for="campo-nome">Nome do cliente</label>
-      <input id="campo-nome" type="text" maxlength="100" required>
-      <button type="submit" class="principal">Adicionar</button>
-    </form>
-    <p id="lista-vazia" class="vazio">Nenhum cliente cadastrado.</p>
-    <ul id="lista-clientes" class="lista"></ul>
-
-    <h2>Histórico de alterações</h2>
-    <p class="ajuda">As 10 alterações mais recentes, gravadas na tabela <code>historico_alteracao</code>.</p>
-    <table id="tabela-historico" class="tabela">
-      <thead><tr><th>Quando</th><th>Ação</th><th>Tabela</th><th>Registro</th><th>Dados</th></tr></thead>
+  <!-- Funcionários -->
+  <section id="tela-funcionarios" class="tela" hidden>
+    <div class="cabecalho-tela">
+      <h2>Funcionários</h2>
+      <div class="botoes">
+        <button id="btn-exemplo" type="button" hidden>Carregar dados de exemplo</button>
+        <button id="btn-novo-funcionario" type="button" class="principal">Novo funcionário</button>
+      </div>
+    </div>
+    <div class="filtros">
+      <label>Buscar <input id="filtro-busca" type="search" placeholder="Nome ou matrícula"></label>
+      <label>Time <select id="filtro-time"></select></label>
+      <label>Situação
+        <select id="filtro-situacao">
+          <option value="ativos">Ativos</option>
+          <option value="desligados">Desligados</option>
+          <option value="todos">Todos</option>
+        </select>
+      </label>
+    </div>
+    <p id="func-contagem" class="ajuda"></p>
+    <table id="tabela-funcionarios" class="tabela">
+      <thead><tr><th>Matrícula</th><th>Nome</th><th>Time</th><th>Admissão</th><th>Situação</th><th></th></tr></thead>
       <tbody></tbody>
     </table>
+    <p id="func-vazio" class="vazio" hidden></p>
+  </section>
+
+  <!-- Times -->
+  <section id="tela-times" class="tela" hidden>
+    <h2>Clientes e centros de custo</h2>
+    <div class="duas-colunas">
+      <div>
+        <div class="cabecalho-tela">
+          <h3>Clientes</h3>
+          <button id="btn-novo-cliente" type="button">Novo cliente</button>
+        </div>
+        <table id="tabela-clientes" class="tabela">
+          <thead><tr><th>Nome</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div>
+        <div class="cabecalho-tela">
+          <h3>Centros de custo</h3>
+          <button id="btn-novo-centro" type="button">Novo centro de custo</button>
+        </div>
+        <table id="tabela-centros" class="tabela">
+          <thead><tr><th>Código</th><th>Cliente</th><th>Município</th><th>UF</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cabecalho-tela">
+      <h2>Times</h2>
+      <button id="btn-novo-time" type="button" class="principal">Novo time</button>
+    </div>
+    <p class="ajuda">
+      Ocupação = (pessoas ativas × 30) ÷ (limite × 365).
+      <span class="selo verde">até 50%</span>
+      <span class="selo amarelo">de 50% a 70%</span>
+      <span class="selo vermelho">acima de 70%</span>
+    </p>
+    <div id="lista-times"></div>
+    <p id="times-vazio" class="vazio" hidden>Nenhum time cadastrado.</p>
+  </section>
+
+  <!-- Substitutos -->
+  <section id="tela-substitutos" class="tela" hidden>
+    <div class="cabecalho-tela">
+      <h2>Substitutos</h2>
+      <button id="btn-novo-par" type="button" class="principal">Novo par</button>
+    </div>
+    <p class="ajuda">As duas pessoas de um par não devem estar de férias ao mesmo tempo.</p>
+    <table id="tabela-pares" class="tabela">
+      <thead><tr><th>Pessoa 1</th><th>Pessoa 2</th><th>Tolerância (dias)</th><th>Motivo</th><th>Situação</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p id="pares-vazio" class="vazio" hidden>Nenhum par cadastrado.</p>
+  </section>
+
+  <!-- Histórico -->
+  <section id="tela-historico" class="tela" hidden>
+    <h2>Histórico de alterações</h2>
+    <div class="filtros">
+      <label>Tabela <select id="filtro-historico"></select></label>
+    </div>
+    <p class="ajuda">As 100 alterações mais recentes. Data e hora no horário de Brasília.</p>
+    <table id="tabela-historico" class="tabela">
+      <thead><tr><th>Data e hora</th><th>Ação</th><th>Tabela</th><th>Registro</th><th>Dados</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p id="historico-vazio" class="vazio" hidden>Nenhuma alteração registrada.</p>
   </section>
 </main>
 
@@ -67,12 +150,90 @@
   <span id="rodape-gravacao"></span>
 </footer>
 
+<!-- Formulários -->
+<dialog id="dlg-funcionario">
+  <form novalidate>
+    <h3 class="titulo-dialogo"></h3>
+    <div class="campo"><label for="f-matricula">Matrícula</label><input id="f-matricula" name="matricula" maxlength="30"><span class="erro-campo" data-erro="matricula"></span></div>
+    <div class="campo"><label for="f-nome">Nome</label><input id="f-nome" name="nome" maxlength="120"><span class="erro-campo" data-erro="nome"></span></div>
+    <div class="campo"><label for="f-admissao">Data de admissão</label><input id="f-admissao" name="data_admissao" type="date"><span class="erro-campo" data-erro="data_admissao"></span></div>
+    <div class="campo"><label for="f-time">Time</label><select id="f-time" name="time_id"></select><span class="erro-campo" data-erro="time_id"></span></div>
+    <div class="campo"><label for="f-email">E-mail (opcional)</label><input id="f-email" name="email" type="email" maxlength="120"><span class="erro-campo" data-erro="email"></span></div>
+    <div class="campo"><label for="f-observacao">Observação (opcional)</label><textarea id="f-observacao" name="observacao" rows="2" maxlength="500"></textarea><span class="erro-campo" data-erro="observacao"></span></div>
+    <p class="erro-campo" data-erro="_geral"></p>
+    <div class="botoes"><button type="submit" class="principal">Salvar</button><button type="button" data-fechar>Cancelar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-desligar">
+  <form novalidate>
+    <h3 class="titulo-dialogo"></h3>
+    <p class="ajuda">A pessoa sai da lista padrão e do cálculo de ocupação. O histórico fica guardado.</p>
+    <div class="campo"><label for="d-data">Data de desligamento</label><input id="d-data" name="data_desligamento" type="date"><span class="erro-campo" data-erro="data_desligamento"></span></div>
+    <p class="erro-campo" data-erro="_geral"></p>
+    <div class="botoes"><button type="submit" class="principal">Desligar</button><button type="button" data-fechar>Cancelar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-cliente">
+  <form novalidate>
+    <h3 class="titulo-dialogo"></h3>
+    <div class="campo"><label for="c-nome">Nome do cliente</label><input id="c-nome" name="nome" maxlength="120"><span class="erro-campo" data-erro="nome"></span></div>
+    <p class="erro-campo" data-erro="_geral"></p>
+    <div class="botoes"><button type="submit" class="principal">Salvar</button><button type="button" data-fechar>Cancelar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-centro">
+  <form novalidate>
+    <h3 class="titulo-dialogo"></h3>
+    <div class="campo"><label for="cc-codigo">Código</label><input id="cc-codigo" name="codigo" maxlength="30"><span class="erro-campo" data-erro="codigo"></span></div>
+    <div class="campo"><label for="cc-cliente">Cliente</label><select id="cc-cliente" name="cliente_id"></select><span class="erro-campo" data-erro="cliente_id"></span></div>
+    <div class="campo"><label for="cc-municipio">Município (opcional)</label><input id="cc-municipio" name="municipio" maxlength="80"><span class="erro-campo" data-erro="municipio"></span></div>
+    <div class="campo"><label for="cc-uf">UF (opcional)</label><input id="cc-uf" name="uf" maxlength="2" class="curto"><span class="erro-campo" data-erro="uf"></span></div>
+    <p class="erro-campo" data-erro="_geral"></p>
+    <div class="botoes"><button type="submit" class="principal">Salvar</button><button type="button" data-fechar>Cancelar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-time">
+  <form novalidate>
+    <h3 class="titulo-dialogo"></h3>
+    <div class="campo"><label for="t-centro">Centro de custo</label><select id="t-centro" name="centro_custo_id"></select><span class="erro-campo" data-erro="centro_custo_id"></span></div>
+    <div class="campo"><label for="t-nome">Nome do time</label><input id="t-nome" name="nome" maxlength="80"><span class="erro-campo" data-erro="nome"></span></div>
+    <div class="campo"><label for="t-limite">Limite de pessoas de férias ao mesmo tempo</label><input id="t-limite" name="limite_ausencias" type="number" min="1" step="1" class="curto"><span class="erro-campo" data-erro="limite_ausencias"></span></div>
+    <div class="campo"><label for="t-tolerancia">Tolerância (dias acima do limite)</label><input id="t-tolerancia" name="tolerancia_dias" type="number" min="0" step="1" class="curto"><span class="erro-campo" data-erro="tolerancia_dias"></span></div>
+    <p class="erro-campo" data-erro="_geral"></p>
+    <div class="botoes"><button type="submit" class="principal">Salvar</button><button type="button" data-fechar>Cancelar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-par">
+  <form novalidate>
+    <h3 class="titulo-dialogo"></h3>
+    <div class="campo"><label for="p-a">Pessoa 1</label><select id="p-a" name="funcionario_a_id"></select><span class="erro-campo" data-erro="funcionario_a_id"></span></div>
+    <div class="campo"><label for="p-b">Pessoa 2</label><select id="p-b" name="funcionario_b_id"></select><span class="erro-campo" data-erro="funcionario_b_id"></span></div>
+    <div class="campo"><label for="p-tolerancia">Tolerância (dias juntos)</label><input id="p-tolerancia" name="tolerancia_dias" type="number" min="0" step="1" class="curto"><span class="erro-campo" data-erro="tolerancia_dias"></span></div>
+    <div class="campo"><label for="p-motivo">Motivo (opcional)</label><input id="p-motivo" name="motivo" maxlength="200"><span class="erro-campo" data-erro="motivo"></span></div>
+    <p class="erro-campo" data-erro="_geral"></p>
+    <div class="botoes"><button type="submit" class="principal">Salvar</button><button type="button" data-fechar>Cancelar</button></div>
+  </form>
+</dialog>
+
 <!-- build:dados -->
 <script src="../vendor/sql-wasm.js"></script>
 <script src="../vendor/xlsx.full.min.js"></script>
+<script src="js/datas.js"></script>
+<script src="js/regras.js"></script>
 <script src="js/arquivo.js"></script>
 <script src="js/banco.js"></script>
+<script src="js/cadastro.js"></script>
 <script src="js/espelho.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/tela_funcionarios.js"></script>
+<script src="js/tela_times.js"></script>
+<script src="js/tela_substitutos.js"></script>
+<script src="js/tela_historico.js"></script>
 <script src="js/principal.js"></script>
 </body>
 </html>

@@ -1,0 +1,429 @@
+{
+  "_comentario": "Dados FICTÍCIOS gerados por scripts/gerar_dados_ficticios.py. Os e-mails usam o domínio exemplo.com (D44).",
+  "clientes": [
+    {
+      "nome": "Cliente Alfa (Energia)"
+    },
+    {
+      "nome": "Cliente Beta (Logística)"
+    },
+    {
+      "nome": "Cliente Gama (Saneamento)"
+    },
+    {
+      "nome": "Interno (Sede)"
+    }
+  ],
+  "centros_custo": [
+    {
+      "codigo": "CC 100",
+      "cliente": "Cliente Alfa (Energia)",
+      "municipio": "Cidade Exemplo A",
+      "uf": "SP"
+    },
+    {
+      "codigo": "CC 210",
+      "cliente": "Cliente Beta (Logística)",
+      "municipio": "Cidade Exemplo B",
+      "uf": "MG"
+    },
+    {
+      "codigo": "CC 305",
+      "cliente": "Cliente Gama (Saneamento)",
+      "municipio": "Cidade Exemplo C",
+      "uf": "RJ"
+    },
+    {
+      "codigo": "CC 410",
+      "cliente": "Cliente Gama (Saneamento)",
+      "municipio": "Cidade Exemplo D",
+      "uf": "RJ"
+    },
+    {
+      "codigo": "SEDE",
+      "cliente": "Interno (Sede)",
+      "municipio": "Cidade Exemplo A",
+      "uf": "SP"
+    }
+  ],
+  "times": [
+    {
+      "centro_custo": "CC 100",
+      "nome": "Fiscalização",
+      "limite_ausencias": 1,
+      "tolerancia_dias": 0
+    },
+    {
+      "centro_custo": "CC 100",
+      "nome": "Suprimentos e Orçamentário",
+      "limite_ausencias": 1,
+      "tolerancia_dias": 0
+    },
+    {
+      "centro_custo": "SEDE",
+      "nome": "Administrativo",
+      "limite_ausencias": 2,
+      "tolerancia_dias": 0
+    },
+    {
+      "centro_custo": "CC 210",
+      "nome": "Administrativo",
+      "limite_ausencias": 2,
+      "tolerancia_dias": 2
+    },
+    {
+      "centro_custo": "CC 210",
+      "nome": "Operacional",
+      "limite_ausencias": 1,
+      "tolerancia_dias": 0
+    },
+    {
+      "centro_custo": "CC 305",
+      "nome": "Externa",
+      "limite_ausencias": 1,
+      "tolerancia_dias": 1
+    },
+    {
+      "centro_custo": "CC 305",
+      "nome": "Interna",
+      "limite_ausencias": 1,
+      "tolerancia_dias": 1
+    },
+    {
+      "centro_custo": "CC 410",
+      "nome": "Externa",
+      "limite_ausencias": 1,
+      "tolerancia_dias": 0
+    }
+  ],
+  "funcionarios": [
+    {
+      "matricula": "90001",
+      "nome": "Heitor Albuquerque Lacerda",
+      "data_admissao": "2025-02-03",
+      "centro_custo": "CC 100",
+      "time": "Fiscalização",
+      "email": "heitor.lacerda@exemplo.com"
+    },
+    {
+      "matricula": "90002",
+      "nome": "Fábio Zanetti Rezende",
+      "data_admissao": "2020-10-17",
+      "centro_custo": "CC 100",
+      "time": "Fiscalização",
+      "email": "fabio.rezende@exemplo.com"
+    },
+    {
+      "matricula": "90003",
+      "nome": "Bruno Cardoso Gouveia",
+      "data_admissao": "2025-01-28",
+      "centro_custo": "CC 100",
+      "time": "Fiscalização",
+      "email": "bruno.gouveia@exemplo.com"
+    },
+    {
+      "matricula": "90004",
+      "nome": "Patrícia Rezende Hartmann",
+      "data_admissao": "2021-05-18",
+      "centro_custo": "CC 100",
+      "time": "Fiscalização",
+      "email": "patricia.hartmann@exemplo.com"
+    },
+    {
+      "matricula": "90005",
+      "nome": "Gustavo Nogueira Lacerda",
+      "data_admissao": "2021-12-19",
+      "centro_custo": "CC 100",
+      "time": "Fiscalização",
+      "email": "gustavo.lacerda@exemplo.com"
+    },
+    {
+      "matricula": "90006",
+      "nome": "Gisele Paixão Paixão",
+      "data_admissao": "2021-08-06",
+      "centro_custo": "CC 100",
+      "time": "Fiscalização",
+      "email": "gisele.paixao@exemplo.com"
+    },
+    {
+      "matricula": "90007",
+      "nome": "Patrícia Duarte Queiroz",
+      "data_admissao": "2018-11-10",
+      "centro_custo": "CC 100",
+      "time": "Suprimentos e Orçamentário",
+      "email": "patricia.queiroz@exemplo.com"
+    },
+    {
+      "matricula": "90008",
+      "nome": "Rafael Macedo Moraes",
+      "data_admissao": "2019-04-04",
+      "centro_custo": "CC 100",
+      "time": "Suprimentos e Orçamentário",
+      "email": "rafael.moraes@exemplo.com"
+    },
+    {
+      "matricula": "90009",
+      "nome": "Tatiane Cardoso Hartmann",
+      "data_admissao": "2021-11-21",
+      "centro_custo": "CC 100",
+      "time": "Suprimentos e Orçamentário",
+      "email": "tatiane.hartmann@exemplo.com"
+    },
+    {
+      "matricula": "90010",
+      "nome": "Daniela Lacerda Sampaio",
+      "data_admissao": "2021-08-22",
+      "centro_custo": "CC 100",
+      "time": "Suprimentos e Orçamentário",
+      "email": null
+    },
+    {
+      "matricula": "90011",
+      "nome": "Karina Paixão Paixão",
+      "data_admissao": "2023-01-16",
+      "centro_custo": "CC 100",
+      "time": "Suprimentos e Orçamentário",
+      "email": "karina.paixao@exemplo.com"
+    },
+    {
+      "matricula": "90012",
+      "nome": "Elaine Moraes Figueiredo",
+      "data_admissao": "2022-07-01",
+      "centro_custo": "CC 100",
+      "time": "Suprimentos e Orçamentário",
+      "email": null
+    },
+    {
+      "matricula": "90013",
+      "nome": "Karina Sampaio Queiroz",
+      "data_admissao": "2020-02-16",
+      "centro_custo": "SEDE",
+      "time": "Administrativo",
+      "email": "karina.queiroz@exemplo.com"
+    },
+    {
+      "matricula": "90014",
+      "nome": "Rafael Hartmann Nogueira",
+      "data_admissao": "2023-10-29",
+      "centro_custo": "SEDE",
+      "time": "Administrativo",
+      "email": "rafael.nogueira@exemplo.com"
+    },
+    {
+      "matricula": "90015",
+      "nome": "Olívia Barros Nogueira",
+      "data_admissao": "2023-04-24",
+      "centro_custo": "SEDE",
+      "time": "Administrativo",
+      "email": "olivia.nogueira@exemplo.com"
+    },
+    {
+      "matricula": "90016",
+      "nome": "Nelson Teixeira Queiroz",
+      "data_admissao": "2023-08-26",
+      "centro_custo": "SEDE",
+      "time": "Administrativo",
+      "email": "nelson.queiroz@exemplo.com"
+    },
+    {
+      "matricula": "90017",
+      "nome": "Renata Zanetti Rezende",
+      "data_admissao": "2020-07-26",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "renata.rezende@exemplo.com"
+    },
+    {
+      "matricula": "90018",
+      "nome": "Diego Duarte Esteves",
+      "data_admissao": "2025-08-18",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "diego.esteves@exemplo.com"
+    },
+    {
+      "matricula": "90019",
+      "nome": "Daniela Moraes Sampaio",
+      "data_admissao": "2025-06-28",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "daniela.sampaio2@exemplo.com"
+    },
+    {
+      "matricula": "90020",
+      "nome": "Patrícia Lacerda Nogueira",
+      "data_admissao": "2022-11-27",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "patricia.nogueira@exemplo.com"
+    },
+    {
+      "matricula": "90021",
+      "nome": "Tatiane Rezende Figueiredo",
+      "data_admissao": "2024-05-21",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "tatiane.figueiredo@exemplo.com"
+    },
+    {
+      "matricula": "90022",
+      "nome": "Marcela Figueiredo Valadares",
+      "data_admissao": "2019-11-24",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "marcela.valadares@exemplo.com"
+    },
+    {
+      "matricula": "90023",
+      "nome": "Vinícius Valadares Moraes",
+      "data_admissao": "2023-01-10",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": null
+    },
+    {
+      "matricula": "90024",
+      "nome": "Otávio Albuquerque Moraes",
+      "data_admissao": "2020-03-15",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "otavio.moraes@exemplo.com"
+    },
+    {
+      "matricula": "90025",
+      "nome": "Vinícius Hartmann Barros",
+      "data_admissao": "2022-02-01",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "vinicius.barros@exemplo.com"
+    },
+    {
+      "matricula": "90026",
+      "nome": "Fábio Cardoso Teixeira",
+      "data_admissao": "2022-11-22",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "fabio.teixeira@exemplo.com"
+    },
+    {
+      "matricula": "90027",
+      "nome": "Juliana Xavier Figueiredo",
+      "data_admissao": "2021-02-13",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "juliana.figueiredo@exemplo.com"
+    },
+    {
+      "matricula": "90028",
+      "nome": "Mariana Macedo Queiroz",
+      "data_admissao": "2025-09-09",
+      "centro_custo": "CC 210",
+      "time": "Administrativo",
+      "email": "mariana.queiroz@exemplo.com"
+    },
+    {
+      "matricula": "90029",
+      "nome": "Paulo Hartmann Cardoso",
+      "data_admissao": "2019-03-23",
+      "centro_custo": "CC 210",
+      "time": "Operacional",
+      "email": "paulo.cardoso@exemplo.com"
+    },
+    {
+      "matricula": "90030",
+      "nome": "Elaine Barros Hartmann",
+      "data_admissao": "2020-11-04",
+      "centro_custo": "CC 210",
+      "time": "Operacional",
+      "email": "elaine.hartmann@exemplo.com"
+    },
+    {
+      "matricula": "90031",
+      "nome": "Carla Nogueira Cardoso",
+      "data_admissao": "2022-06-21",
+      "centro_custo": "CC 210",
+      "time": "Operacional",
+      "email": "carla.cardoso@exemplo.com"
+    },
+    {
+      "matricula": "90032",
+      "nome": "Simone Zanetti Teixeira",
+      "data_admissao": "2023-02-02",
+      "centro_custo": "CC 210",
+      "time": "Operacional",
+      "email": "simone.teixeira@exemplo.com"
+    },
+    {
+      "matricula": "90033",
+      "nome": "Fernanda Gouveia Duarte",
+      "data_admissao": "2020-11-19",
+      "centro_custo": "CC 305",
+      "time": "Externa",
+      "email": "fernanda.duarte@exemplo.com"
+    },
+    {
+      "matricula": "90034",
+      "nome": "Gustavo Paixão Rezende",
+      "data_admissao": "2022-04-29",
+      "centro_custo": "CC 305",
+      "time": "Externa",
+      "email": "gustavo.rezende@exemplo.com"
+    },
+    {
+      "matricula": "90035",
+      "nome": "Gisele Barros Queiroz",
+      "data_admissao": "2019-10-08",
+      "centro_custo": "CC 305",
+      "time": "Externa",
+      "email": null
+    },
+    {
+      "matricula": "90036",
+      "nome": "Patrícia Sampaio Esteves",
+      "data_admissao": "2024-05-05",
+      "centro_custo": "CC 305",
+      "time": "Externa",
+      "email": "patricia.esteves@exemplo.com"
+    },
+    {
+      "matricula": "90037",
+      "nome": "Rafael Duarte Barros",
+      "data_admissao": "2019-08-30",
+      "centro_custo": "CC 305",
+      "time": "Interna",
+      "email": null
+    },
+    {
+      "matricula": "90038",
+      "nome": "Ana Cardoso Hartmann",
+      "data_admissao": "2019-12-25",
+      "centro_custo": "CC 305",
+      "time": "Interna",
+      "email": "ana.hartmann@exemplo.com"
+    },
+    {
+      "matricula": "90039",
+      "nome": "Daniela Albuquerque Queiroz",
+      "data_admissao": "2020-02-13",
+      "centro_custo": "CC 410",
+      "time": "Externa",
+      "email": null
+    },
+    {
+      "matricula": "90040",
+      "nome": "Igor Macedo Rezende",
+      "data_admissao": "2021-09-22",
+      "centro_custo": "CC 410",
+      "time": "Externa",
+      "email": "igor.rezende@exemplo.com"
+    }
+  ],
+  "substitutos": [
+    {
+      "matricula_a": "90001",
+      "matricula_b": "90007",
+      "tolerancia_dias": 0,
+      "motivo": "Gestor do contrato e preposto não podem sair juntos (D14)"
+    }
+  ]
+}

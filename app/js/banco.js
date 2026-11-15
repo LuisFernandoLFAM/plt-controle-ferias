@@ -1,10 +1,12 @@
-// Banco de dados SQLite em memória (sql.js). O arquivo em disco é gravado
-// por arquivo.js a partir de exportar().
+// Banco de dados SQLite em memória (sql.js) e migrações (D38, D39).
+// O arquivo em disco é gravado por arquivo.js a partir de exportar().
 'use strict';
 
 const Banco = (() => {
   let SQL = null;
   let db = null;
+  // Lista { versao, nome, sql } embutida pelo build. Os testes podem trocar com definirMigracoes().
+  let migracoes = Array.isArray(window.MIGRACOES) ? window.MIGRACOES : [];
 
   function base64ParaBytes(texto) {
     const bin = atob(texto);
@@ -13,24 +15,12 @@ const Banco = (() => {
     return bytes;
   }
 
-  // No arquivo final (dist/), o build embute o .wasm e o schema.
-  // Em desenvolvimento (servidor local), eles são lidos das pastas do projeto.
-  async function lerWasm() {
-    if (typeof window.WASM_BASE64 === 'string') return base64ParaBytes(window.WASM_BASE64);
-    const resp = await fetch('../vendor/sql-wasm.wasm');
-    if (!resp.ok) throw new Error('não encontrei vendor/sql-wasm.wasm');
-    return new Uint8Array(await resp.arrayBuffer());
-  }
-
-  async function lerSchema() {
-    if (typeof window.SCHEMA_SQL === 'string') return window.SCHEMA_SQL;
-    const resp = await fetch('../sql/schema.sql');
-    if (!resp.ok) throw new Error('não encontrei sql/schema.sql');
-    return resp.text();
-  }
-
   async function iniciar() {
-    if (!SQL) SQL = await initSqlJs({ wasmBinary: await lerWasm() });
+    if (SQL) return;
+    if (typeof window.WASM_BASE64 !== 'string') {
+      throw new Error('arquivo incompleto. Use o dist/controle_ferias.html gerado pelo build.');
+    }
+    SQL = await initSqlJs({ wasmBinary: base64ParaBytes(window.WASM_BASE64) });
   }
 
   function prepararConexao() {
@@ -41,11 +31,15 @@ const Banco = (() => {
     if (db) { db.close(); db = null; }
   }
 
+  function aberto() {
+    return db !== null;
+  }
+
+  // Banco vazio (sem tabelas). Depois, chame migrar().
   async function criarNovo() {
     await iniciar();
     fechar();
     db = new SQL.Database();
-    db.exec(await lerSchema());
     prepararConexao();
   }
 
@@ -97,17 +91,6 @@ const Banco = (() => {
     }
   }
 
-  function registrarHistorico(tabela, registroId, acao, antes, depois) {
-    executar(
-      `INSERT INTO historico_alteracao (tabela, registro_id, acao, dados_antes, dados_depois, usuario)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [tabela, registroId, acao,
-        antes == null ? null : JSON.stringify(antes),
-        depois == null ? null : JSON.stringify(depois),
-        'gestor'],
-    );
-  }
-
   function tabelas() {
     return consultar(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
@@ -118,8 +101,65 @@ const Banco = (() => {
     return db.export();
   }
 
+  // ---------- Versão e migrações ----------
+
+  function definirMigracoes(lista) {
+    migracoes = lista;
+  }
+
+  function versaoApp() {
+    return migracoes.reduce((max, m) => Math.max(max, m.versao), 0);
+  }
+
+  function versaoBanco() {
+    return consultar('PRAGMA user_version')[0].user_version;
+  }
+
+  // 'vazio'         banco sem tabelas (novo): precisa das migrações
+  // 'desatualizado' versão menor que a do app: precisa das migrações
+  // 'ok'            mesma versão do app
+  // 'mais_novo'     criado por uma versão mais nova do app: não abrir
+  // 'fase0'         banco de teste da Fase 0 (user_version 0 com a tabela cliente): não abrir (D39)
+  // 'desconhecido'  user_version 0 com outras tabelas: não é um banco deste app
+  function situacao() {
+    const versao = versaoBanco();
+    if (versao === 0) {
+      const lista = tabelas();
+      if (lista.length === 0) return 'vazio';
+      if (lista.includes('cliente')) return 'fase0';
+      return 'desconhecido';
+    }
+    const app = versaoApp();
+    if (versao > app) return 'mais_novo';
+    if (versao < app) return 'desatualizado';
+    return 'ok';
+  }
+
+  // Aplica as migrações que faltam numa transação só. Se uma falhar, desfaz todas.
+  // Devolve a quantidade aplicada.
+  function migrar() {
+    const atual = versaoBanco();
+    const pendentes = migracoes.filter(m => m.versao > atual).sort((a, b) => a.versao - b.versao);
+    if (pendentes.length === 0) return 0;
+    let emAndamento = null;
+    db.run('BEGIN');
+    try {
+      for (const m of pendentes) {
+        emAndamento = m;
+        db.exec(m.sql);
+        db.run(`PRAGMA user_version = ${Number(m.versao)}`);
+      }
+      db.run('COMMIT');
+    } catch (e) {
+      db.run('ROLLBACK');
+      throw new Error(`Não foi possível atualizar o banco (${emAndamento.nome}): ${e.message}`);
+    }
+    return pendentes.length;
+  }
+
   return {
-    iniciar, criarNovo, abrir, fechar, consultar, executar, ultimoId,
-    transacao, registrarHistorico, tabelas, exportar,
+    iniciar, criarNovo, abrir, fechar, aberto, consultar, executar, ultimoId,
+    transacao, tabelas, exportar,
+    definirMigracoes, versaoApp, versaoBanco, situacao, migrar,
   };
 })();

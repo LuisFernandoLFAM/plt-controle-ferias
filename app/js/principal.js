@@ -1,22 +1,36 @@
-// Tela e eventos da Fase 0: escolher a pasta, criar/abrir o banco,
-// cadastrar e remover clientes, gravar e gerar o Excel espelho.
+// Início do app: pasta de dados, abertura e migração do banco (D38, D39),
+// gravação (banco + Excel espelho) e navegação entre as telas.
 'use strict';
 
-(() => {
-  const $ = id => document.getElementById(id);
-  const TELAS = ['tela-carregando', 'tela-nao-suportado', 'tela-inicio', 'tela-criar', 'tela-clientes'];
+const App = (() => {
+  const { $ } = UI;
+  const TELAS_INICIO = ['tela-carregando', 'tela-nao-suportado', 'tela-inicio', 'tela-criar'];
+  const TELAS_APP = {
+    funcionarios: TelaFuncionarios,
+    times: TelaTimes,
+    substitutos: TelaSubstitutos,
+    historico: TelaHistorico,
+  };
+  const MSG = {
+    fase0: 'Este é um banco de teste antigo. Escolha uma pasta nova.',
+    maisNovo: 'Este banco foi criado por uma versão mais nova do app. Use o arquivo mais recente.',
+    invalido: `O arquivo ${Arquivo.NOME_BANCO} desta pasta não é um banco deste app. Escolha outra pasta.`,
+  };
 
   const estado = {
     pasta: null,          // FileSystemDirectoryHandle da pasta de dados
     pastaGuardada: null,  // pasta da última vez (vinda do IndexedDB)
     ultimaGravacao: null, // Date
     ocupado: false,
+    tela: 'funcionarios',
   };
 
   // ---------- Utilidades de tela ----------
 
   function mostrarTela(id) {
-    for (const t of TELAS) $(t).hidden = t !== id;
+    for (const t of TELAS_INICIO) $(t).hidden = t !== id;
+    for (const nome of Object.keys(TELAS_APP)) $(`tela-${nome}`).hidden = `tela-${nome}` !== id;
+    $('menu').hidden = !id.startsWith('tela-') || TELAS_INICIO.includes(id);
   }
 
   function mensagem(texto, tipo = 'erro') {
@@ -30,21 +44,10 @@
     $('mensagem').hidden = true;
   }
 
-  const p2 = n => String(n).padStart(2, '0');
-  function dataHora(d) {
-    return `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
-  }
-
-  // historico_alteracao.em vem do SQLite em UTC ("AAAA-MM-DD HH:MM:SS").
-  function utcParaLocal(texto) {
-    const d = new Date(texto.replace(' ', 'T') + 'Z');
-    return isNaN(d) ? texto : dataHora(d);
-  }
-
   function atualizarRodape() {
     $('rodape-pasta').textContent = estado.pasta ? 'Pasta: ' + estado.pasta.name : 'Nenhuma pasta aberta';
     $('rodape-gravacao').textContent = estado.ultimaGravacao
-      ? 'Última gravação: ' + dataHora(estado.ultimaGravacao)
+      ? 'Última gravação: ' + Datas.formatar(estado.ultimaGravacao)
       : '';
   }
 
@@ -64,6 +67,16 @@
     }
   }
 
+  function irPara(nome) {
+    estado.tela = nome;
+    document.querySelectorAll('#menu button').forEach(b => {
+      if (b.dataset.tela === nome) b.setAttribute('aria-current', 'page');
+      else b.removeAttribute('aria-current');
+    });
+    mostrarTela(`tela-${nome}`);
+    TELAS_APP[nome].desenhar();
+  }
+
   // ---------- Gravação ----------
 
   async function gravar() {
@@ -80,7 +93,21 @@
     }
   }
 
+  // Depois de cada alteração: grava e redesenha a tela atual.
+  async function alterou() {
+    await gravar();
+    TELAS_APP[estado.tela].desenhar();
+  }
+
   // ---------- Pasta e banco ----------
+
+  function recusar(texto) {
+    Banco.fechar();
+    estado.pasta = null;
+    atualizarRodape();
+    mensagem(texto);
+    mostrarTela('tela-inicio');
+  }
 
   async function usarPasta(pasta) {
     if (!(await Arquivo.pedirPermissao(pasta))) {
@@ -103,20 +130,45 @@
       await Banco.abrir(lido.dados);
     } catch (e) {
       console.error(e);
-      mensagem(`O arquivo ${Arquivo.NOME_BANCO} desta pasta não é um banco válido. Escolha outra pasta.`);
-      mostrarTela('tela-inicio');
+      recusar(MSG.invalido);
       return;
     }
+
+    const situacao = Banco.situacao();
+    if (situacao === 'fase0') { recusar(MSG.fase0); return; }
+    if (situacao === 'mais_novo') { recusar(MSG.maisNovo); return; }
+    if (situacao === 'desconhecido') { recusar(MSG.invalido); return; }
+
     estado.ultimaGravacao = lido.modificadoEm;
     atualizarRodape();
 
-    try {
-      await Arquivo.fazerBackup(pasta, lido.dados);
-    } catch (e) {
-      console.error(e);
-      mensagem('O banco foi aberto, mas não consegui fazer a cópia de segurança na pasta "backups".', 'aviso');
+    if (situacao === 'desatualizado' || situacao === 'vazio') {
+      // D38: backup antes de mexer; migrações numa transação; se falhar, nada muda no arquivo.
+      try {
+        await Arquivo.fazerBackup(pasta, lido.dados, new Date(), '_antes_migracao');
+      } catch (e) {
+        console.error(e);
+        recusar('Não consegui fazer a cópia de segurança antes de atualizar o banco. Nada foi alterado.');
+        return;
+      }
+      try {
+        Banco.migrar();
+      } catch (e) {
+        console.error(e);
+        recusar(e.message + ' Nada foi alterado.');
+        return;
+      }
+      await gravar();
+      mensagem('O banco foi atualizado para a versão nova do app. Uma cópia da versão anterior ficou na pasta "backups".', 'ok');
+    } else {
+      try {
+        await Arquivo.fazerBackup(pasta, lido.dados);
+      } catch (e) {
+        console.error(e);
+        mensagem('O banco foi aberto, mas não consegui fazer a cópia de segurança na pasta "backups".', 'aviso');
+      }
     }
-    abrirTelaClientes();
+    irPara('funcionarios');
   }
 
   async function escolherPasta() {
@@ -132,103 +184,11 @@
 
   async function criarBanco() {
     await Banco.criarNovo();
+    Banco.migrar();
     await Arquivo.pastaBackups(estado.pasta);
     await gravar();
     mensagem('Banco criado nesta pasta.', 'ok');
-    abrirTelaClientes();
-  }
-
-  // ---------- Clientes ----------
-
-  function abrirTelaClientes() {
-    mostrarTela('tela-clientes');
-    desenharClientes();
-    desenharHistorico();
-    $('campo-nome').focus();
-  }
-
-  function desenharClientes() {
-    const clientes = Banco.consultar('SELECT id, nome FROM cliente ORDER BY nome COLLATE NOCASE');
-    const lista = $('lista-clientes');
-    lista.replaceChildren();
-    for (const c of clientes) {
-      const li = document.createElement('li');
-      const nome = document.createElement('span');
-      nome.textContent = c.nome;
-      const botao = document.createElement('button');
-      botao.type = 'button';
-      botao.textContent = 'Remover';
-      botao.addEventListener('click', () => executarAcao(() => removerCliente(c.id)));
-      li.append(nome, botao);
-      lista.append(li);
-    }
-    $('lista-vazia').hidden = clientes.length > 0;
-  }
-
-  function desenharHistorico() {
-    const linhas = Banco.consultar(
-      'SELECT em, acao, tabela, registro_id, dados_antes, dados_depois FROM historico_alteracao ORDER BY id DESC LIMIT 10',
-    );
-    const corpo = $('tabela-historico').tBodies[0];
-    corpo.replaceChildren();
-    for (const h of linhas) {
-      const tr = document.createElement('tr');
-      const celulas = [utcParaLocal(h.em), h.acao, h.tabela, String(h.registro_id), h.dados_depois || h.dados_antes || ''];
-      celulas.forEach((texto, i) => {
-        const td = document.createElement('td');
-        td.textContent = texto;
-        if (i === 4) td.className = 'dados';
-        tr.append(td);
-      });
-      corpo.append(tr);
-    }
-  }
-
-  async function adicionarCliente() {
-    const campo = $('campo-nome');
-    const nome = campo.value.trim().replace(/\s+/g, ' ');
-    if (!nome) {
-      mensagem('Digite o nome do cliente.', 'aviso');
-      return;
-    }
-    const existe = Banco.consultar('SELECT 1 FROM cliente WHERE nome = ? COLLATE NOCASE', [nome]);
-    if (existe.length) {
-      mensagem('Já existe um cliente com esse nome.', 'aviso');
-      return;
-    }
-    Banco.transacao(() => {
-      Banco.executar('INSERT INTO cliente (nome) VALUES (?)', [nome]);
-      const id = Banco.ultimoId();
-      Banco.registrarHistorico('cliente', id, 'insert', null, { id, nome });
-    });
-    limparMensagem();
-    campo.value = '';
-    desenharClientes();
-    desenharHistorico();
-    await gravar();
-    campo.focus();
-  }
-
-  async function removerCliente(id) {
-    const [cliente] = Banco.consultar('SELECT id, nome FROM cliente WHERE id = ?', [id]);
-    if (!cliente) return;
-    if (!confirm(`Remover o cliente "${cliente.nome}"?`)) return;
-    try {
-      Banco.transacao(() => {
-        Banco.executar('DELETE FROM cliente WHERE id = ?', [id]);
-        Banco.registrarHistorico('cliente', id, 'delete', cliente, null);
-      });
-    } catch (e) {
-      if (/FOREIGN KEY/i.test(e.message)) {
-        mensagem('Este cliente está ligado a um centro de custo e não pode ser removido.', 'aviso');
-        return;
-      }
-      throw e;
-    }
-    limparMensagem();
-    desenharClientes();
-    desenharHistorico();
-    await gravar();
+    irPara('funcionarios');
   }
 
   // ---------- Início ----------
@@ -239,11 +199,15 @@
       return;
     }
 
-    $('btn-escolher-pasta').addEventListener('click', () => executarAcao(() => { limparMensagem(); return escolherPasta(); }));
-    $('btn-outra-pasta').addEventListener('click', () => executarAcao(() => { limparMensagem(); return escolherPasta(); }));
-    $('btn-pasta-anterior').addEventListener('click', () => executarAcao(() => { limparMensagem(); return usarPasta(estado.pastaGuardada); }));
+    const comLimpeza = fn => () => executarAcao(() => { limparMensagem(); return fn(); });
+    $('btn-escolher-pasta').addEventListener('click', comLimpeza(escolherPasta));
+    $('btn-outra-pasta').addEventListener('click', comLimpeza(escolherPasta));
+    $('btn-pasta-anterior').addEventListener('click', comLimpeza(() => usarPasta(estado.pastaGuardada)));
     $('btn-criar-banco').addEventListener('click', () => executarAcao(criarBanco));
-    $('form-cliente').addEventListener('submit', ev => { ev.preventDefault(); executarAcao(adicionarCliente); });
+    document.querySelectorAll('#menu button').forEach(b => {
+      b.addEventListener('click', () => { limparMensagem(); irPara(b.dataset.tela); });
+    });
+    for (const tela of Object.values(TELAS_APP)) tela.iniciar();
 
     try {
       await Banco.iniciar();
@@ -265,5 +229,7 @@
     mostrarTela('tela-inicio');
   }
 
-  iniciar();
+  const pronto = iniciar();
+
+  return { estado, pronto, executarAcao, mensagem, limparMensagem, irPara, alterou, gravar, usarPasta, criarBanco, MSG };
 })();

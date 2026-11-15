@@ -4,11 +4,17 @@ para que o projeto rode e possa ser demonstrado publicamente sem dados reais.
 
     python scripts/gerar_dados_ficticios.py
 
-Saída: data/exemplo/planilha_ferias_ficticia.xlsx
-Inclui de propósito alguns casos problemáticos (início na sexta, fracionamento
-inválido, prazo vencido sem férias) para exercitar as validações.
+Saídas:
+- data/exemplo/planilha_ferias_ficticia.xlsx: planilha no formato da original.
+  Inclui de propósito alguns casos problemáticos (início na sexta, fracionamento
+  inválido, prazo vencido sem férias) para exercitar as validações.
+- data/exemplo/cadastro_exemplo.json: cadastro do app (clientes, centros de custo,
+  times, funcionários e um par de substitutos) com os mesmos nomes da planilha.
+  O build embute esse arquivo para o botão "Carregar dados de exemplo" (D44).
 """
+import json
 import random
+import unicodedata
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -18,6 +24,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 
 RAIZ = Path(__file__).resolve().parents[1]
 SAIDA = RAIZ / "data/exemplo/planilha_ferias_ficticia.xlsx"
+SAIDA_CADASTRO = RAIZ / "data/exemplo/cadastro_exemplo.json"
 DATA_REFERENCIA = date(2026, 11, 1)  # "data em que a planilha foi salva"
 random.seed(42)
 
@@ -34,6 +41,28 @@ TIMES = [("CC 100", "Fiscalização", 6), ("CC 100", "Suprimentos e Orçamentár
          ("SEDE", "Administrativo", 4), ("CC 210", "Administrativo", 12),
          ("CC 210", "Operacional", 4), ("CC 305", "Externa", 4), ("CC 305", "Interna", 2),
          ("CC 410", "Externa", 2)]
+
+# Cadastro do app (fictício). Clientes e limites partem de config/regras_iniciais.exemplo.json.
+CLIENTES_POR_CC = {
+    "CC 100": ("Cliente Alfa (Energia)", "Cidade Exemplo A", "SP"),
+    "CC 210": ("Cliente Beta (Logística)", "Cidade Exemplo B", "MG"),
+    "CC 305": ("Cliente Gama (Saneamento)", "Cidade Exemplo C", "RJ"),
+    "CC 410": ("Cliente Gama (Saneamento)", "Cidade Exemplo D", "RJ"),
+    "SEDE": ("Interno (Sede)", "Cidade Exemplo A", "SP"),
+}
+# (centro de custo, time): (limite de ausências, tolerância em dias)
+LIMITES = {
+    ("CC 100", "Fiscalização"): (1, 0),
+    ("CC 100", "Suprimentos e Orçamentário"): (1, 0),
+    ("SEDE", "Administrativo"): (2, 0),
+    ("CC 210", "Administrativo"): (2, 2),
+    ("CC 210", "Operacional"): (1, 0),
+    ("CC 305", "Externa"): (1, 1),
+    ("CC 305", "Interna"): (1, 1),
+    ("CC 410", "Externa"): (1, 0),
+}
+# D14: gestor do contrato (Fiscalização) e preposto (Suprimentos) não saem juntos
+PAR_SUBSTITUTOS = (("CC 100", "Fiscalização"), ("CC 100", "Suprimentos e Orçamentário"))
 
 
 def proxima_segunda(d):
@@ -107,10 +136,74 @@ def main():
                 if isinstance(c.value, date):
                     c.number_format = "DD/MM/YYYY"
 
+    wb.properties.created = datetime.combine(DATA_REFERENCIA, datetime.min.time())
     wb.properties.modified = datetime.combine(DATA_REFERENCIA, datetime.min.time())
     SAIDA.parent.mkdir(parents=True, exist_ok=True)
     wb.save(SAIDA)
     print(f"{len(ativos)} funcionários fictícios -> {SAIDA}")
+
+    cadastro = montar_cadastro(ativos)
+    SAIDA_CADASTRO.write_text(json.dumps(cadastro, ensure_ascii=False, indent=2) + "\n",
+                              encoding="utf-8", newline="\n")
+    print(f"cadastro de exemplo ({len(cadastro['funcionarios'])} funcionários) -> {SAIDA_CADASTRO}")
+
+
+def sem_acento(texto):
+    return unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().lower()
+
+
+def montar_cadastro(ativos):
+    """Cadastro do app a partir dos funcionários da planilha (mesmos nomes)."""
+    rng = random.Random(2026)  # separado, para não mudar a sequência da planilha
+    clientes, centros = [], []
+    for cc, (cliente, municipio, uf) in CLIENTES_POR_CC.items():
+        if cliente not in clientes:
+            clientes.append(cliente)
+        centros.append({"codigo": cc, "cliente": cliente, "municipio": municipio, "uf": uf})
+
+    times = [{"centro_custo": cc, "nome": sub, "limite_ausencias": LIMITES[(cc, sub)][0],
+              "tolerancia_dias": LIMITES[(cc, sub)][1]} for cc, sub, _ in TIMES]
+
+    funcionarios, emails = [], set()
+    for i, (nome, cc, sub, limite) in enumerate(ativos, start=1):
+        # Data Limite = último dia para iniciar (D03) = fim do concessivo - 29 dias.
+        # Com admissão A, o k-ésimo concessivo termina em A + (k + 2) anos - 1 dia.
+        admissao = limite + timedelta(days=30) - relativedelta(years=2 + rng.randint(0, 6))
+        partes = sem_acento(nome).split()
+        email = f"{partes[0]}.{partes[-1]}@exemplo.com"
+        n = 2
+        while email in emails:
+            email = f"{partes[0]}.{partes[-1]}{n}@exemplo.com"
+            n += 1
+        emails.add(email)
+        funcionarios.append({
+            "matricula": f"9{i:04d}",
+            "nome": nome,
+            "data_admissao": admissao.isoformat(),
+            "centro_custo": cc,
+            "time": sub,
+            "email": email if rng.random() > 0.15 else None,  # alguns sem e-mail (campo opcional)
+        })
+
+    def primeiro(cc, sub):
+        return next(f["matricula"] for f in funcionarios if f["centro_custo"] == cc and f["time"] == sub)
+
+    substitutos = [{
+        "matricula_a": primeiro(*PAR_SUBSTITUTOS[0]),
+        "matricula_b": primeiro(*PAR_SUBSTITUTOS[1]),
+        "tolerancia_dias": 0,
+        "motivo": "Gestor do contrato e preposto não podem sair juntos (D14)",
+    }]
+
+    return {
+        "_comentario": "Dados FICTÍCIOS gerados por scripts/gerar_dados_ficticios.py. "
+                       "Os e-mails usam o domínio exemplo.com (D44).",
+        "clientes": [{"nome": c} for c in clientes],
+        "centros_custo": centros,
+        "times": times,
+        "funcionarios": funcionarios,
+        "substitutos": substitutos,
+    }
 
 
 if __name__ == "__main__":

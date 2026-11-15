@@ -64,6 +64,14 @@ Método da sugestão: ocupação = (pessoas × 30 dias) ÷ (limite × 365 dias).
 | D33 | Decidido | Limites do `mailto:`: só texto simples, sem anexo, até cerca de 1.500 caracteres. O texto da resposta é curto: decisão, datas, prazo de assinatura do aviso. O e-mail sai da conta padrão do Outlook do gestor. | Limitação do Windows e dos navegadores. |
 | D34 | Aberto | Testar na fase do formulário: o Excel do Forms sincroniza na pasta do OneDrive do gestor? Qual é o app de e-mail padrão no computador dele (Outlook clássico ou novo)? | Os dois pontos dependem da configuração do computador. |
 | D28 | Decidido | O código fica em `app/` (vários arquivos, fácil de manter). O script `scripts/build.py` junta tudo num único arquivo `dist/controle_ferias.html`, que é o que vai para o gestor. | Fácil de desenvolver e fácil de entregar. |
+| D37 | Decidido | O banco grava data e hora em UTC (padrão do SQLite). A tela e o Excel espelho mostram sempre o horário de Brasília, no formato dd/mm/aaaa hh:mm. | No teste da Fase 0, o espelho mostrou 01:23 (UTC) para uma ação feita às 22:23. |
+| D38 | Decidido | O banco tem versão (`PRAGMA user_version`). As mudanças de estrutura ficam em `sql/migracoes/NNN_nome.sql`. Ao abrir um banco antigo, o app faz backup e aplica as migrações que faltam, numa transação. Banco de versão mais nova que o app: o app avisa e não abre. | O gestor vai ter dados reais. Mudar o banco nas próximas fases não pode perder nada. |
+| D39 | Decidido | Bancos de teste da Fase 0 não são migrados. O app reconhece e pede uma pasta nova. | Só existem dados de teste nesses bancos. |
+| D40 | Decidido | A matrícula identifica o funcionário: obrigatória e única. Ela vem do campo "Código" do relatório da contabilidade. | É a chave usada no formulário de pedidos (D29) e na importação (Fase 2). |
+| D41 | Decidido | Exclusão definitiva de funcionário: só se ele não tem nenhuma férias registrada, com confirmação. Nos outros casos, o app oferece "Desligar". | Complementa D10. |
+| D42 | Decidido | Status das férias: o banco guarda só "programado" ou "cancelado". "Em andamento" e "concluído" são calculados pelas datas, na hora de mostrar. | Na planilha antiga, o status gravado ficava desatualizado. |
+| D43 | Decidido | A tela de times mostra a ocupação (método das D11 a D13): até 50% verde, de 50% a 70% amarelo, acima de 70% vermelho. | Ajuda o gestor a calibrar os limites. |
+| D44 | Decidido | Botão "Carregar dados de exemplo", só em banco vazio. Os dados são fictícios e os e-mails usam o domínio `exemplo.com`. | Demonstração do portfólio e testes sem dados reais. |
 
 ## Privacidade
 
@@ -85,8 +93,8 @@ Método da sugestão: ocupação = (pessoas × 30 dias) ÷ (limite × 365 dias).
 
 | Fase | Entrega | Status |
 |---|---|---|
-| 0 | Estrutura do app, bibliotecas embutidas, prova de gravação do banco SQLite pelo navegador, build do arquivo único, primeiro commit. | Próxima |
-| 1 | Revisão do `schema.sql` e cadastro de funcionários, times, limites e substitutos (incluir, editar, desligar). | Pendente |
+| 0 | Estrutura do app, bibliotecas embutidas, prova de gravação do banco SQLite pelo navegador, build do arquivo único, primeiro commit. | Concluída e publicada no GitHub em 14/11/2026. Falta o teste no computador do gestor. |
+| 1 | Banco com migrações e cadastro de clientes, centros de custo, times, funcionários e substitutos (incluir, editar, desligar). | Próxima |
 | 2 | Importar o relatório da contabilidade e a planilha de programação, com validação. | Pendente |
 | 3 | Programação de férias com as regras D03 a D08 e os prazos de aviso e pagamento. | Pendente |
 | 4 | Tela "o que fazer hoje", alertas, Gantt e conflitos por time e por substitutos. | Pendente |

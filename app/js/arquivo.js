@@ -115,10 +115,12 @@ const Arquivo = (() => {
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
   }
 
-  // Copia o banco para backups/ferias_AAAA-MM-DD_HHMM.sqlite e apaga as mais antigas.
-  async function fazerBackup(pasta, bytes, agora = new Date()) {
+  // Copia o banco para backups/ferias_AAAA-MM-DD_HHMM<sufixo>.sqlite.
+  // As cópias comuns (sem sufixo) ficam limitadas às 30 mais novas.
+  // As cópias "_antes_migracao" não são apagadas automaticamente.
+  async function fazerBackup(pasta, bytes, agora = new Date(), sufixo = '') {
     const dir = await pastaBackups(pasta);
-    const nome = `ferias_${carimbo(agora)}.sqlite`;
+    const nome = `ferias_${carimbo(agora)}${sufixo}.sqlite`;
     await gravarArquivo(dir, nome, bytes);
     await limparBackups(dir);
     return nome;
