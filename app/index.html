@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<!-- build:csp -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controle de Férias</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<header class="topo">
+  <h1>Controle de Férias</h1>
+  <p class="subtitulo">Fase 0: teste de gravação do banco</p>
+</header>
+
+<main>
+  <div id="mensagem" class="mensagem" role="status" hidden></div>
+
+  <section id="tela-carregando" class="tela">
+    <p>Carregando…</p>
+  </section>
+
+  <section id="tela-nao-suportado" class="tela" hidden>
+    <p class="destaque">Este app funciona no Microsoft Edge ou no Google Chrome.</p>
+    <p>Abra este mesmo arquivo em um desses navegadores: clique com o botão direito no arquivo, escolha "Abrir com" e depois "Microsoft Edge".</p>
+  </section>
+
+  <section id="tela-inicio" class="tela" hidden>
+    <h2>Onde ficam os dados?</h2>
+    <p>Escolha a pasta onde o app vai guardar o banco de dados, o Excel espelho e as cópias de segurança.</p>
+    <div class="botoes">
+      <button id="btn-pasta-anterior" type="button" class="principal" hidden>Abrir a pasta de antes</button>
+      <button id="btn-escolher-pasta" type="button">Escolher pasta</button>
+    </div>
+  </section>
+
+  <section id="tela-criar" class="tela" hidden>
+    <h2>Pasta sem banco de dados</h2>
+    <p>A pasta <strong id="nome-pasta-criar"></strong> ainda não tem o arquivo <code>ferias.sqlite</code>.</p>
+    <div class="botoes">
+      <button id="btn-criar-banco" type="button" class="principal">Criar banco novo nesta pasta</button>
+      <button id="btn-outra-pasta" type="button">Escolher outra pasta</button>
+    </div>
+  </section>
+
+  <section id="tela-clientes" class="tela" hidden>
+    <h2>Clientes</h2>
+    <form id="form-cliente" class="linha-form" autocomplete="off">
+      <label for="campo-nome">Nome do cliente</label>
+      <input id="campo-nome" type="text" maxlength="100" required>
+      <button type="submit" class="principal">Adicionar</button>
+    </form>
+    <p id="lista-vazia" class="vazio">Nenhum cliente cadastrado.</p>
+    <ul id="lista-clientes" class="lista"></ul>
+
+    <h2>Histórico de alterações</h2>
+    <p class="ajuda">As 10 alterações mais recentes, gravadas na tabela <code>historico_alteracao</code>.</p>
+    <table id="tabela-historico" class="tabela">
+      <thead><tr><th>Quando</th><th>Ação</th><th>Tabela</th><th>Registro</th><th>Dados</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</main>
+
+<footer class="rodape">
+  <span id="rodape-pasta">Nenhuma pasta aberta</span>
+  <span id="rodape-gravacao"></span>
+</footer>
+
+<!-- build:dados -->
+<script src="../vendor/sql-wasm.js"></script>
+<script src="../vendor/xlsx.full.min.js"></script>
+<script src="js/arquivo.js"></script>
+<script src="js/banco.js"></script>
+<script src="js/espelho.js"></script>
+<script src="js/principal.js"></script>
+</body>
+</html>

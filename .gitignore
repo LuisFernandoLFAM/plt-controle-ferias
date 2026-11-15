@@ -1,0 +1,48 @@
+# =====================================================================
+# PRIVACIDADE: nada com dados reais de funcionários vai para o GitHub
+# =====================================================================
+
+# Pasta com tudo que é real (planilha original, banco real, pendências,
+# configuração com clientes e centros de custo reais)
+privado/*
+!privado/LEIA-ME.md
+
+# Bancos de dados (qualquer um, inclusive o gerado com dados fictícios)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Planilhas: só as fictícias de data/exemplo/ podem ir para o repositório
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+!data/exemplo/*.xlsx
+!data/exemplo/*.csv
+~$*
+
+# Segredos
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Editor / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build do app (o HTML final é publicado como Release, não versionado)
+dist/
+node_modules/
+*.sqlite-journal

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Segunda camada de proteção (a primeira é o .gitignore).
+# Bloqueia o commit se algum arquivo sensível for adicionado à força (git add -f).
+# Ativar uma vez por clone:  git config core.hooksPath .githooks
+
+bloqueados=$(git diff --cached --name-only --diff-filter=ACMR | grep -E \
+  '^privado/|\.db$|\.sqlite3?$|(^|/)\.env$|secrets\.toml$' | grep -v '^privado/LEIA-ME.md$')
+
+planilhas=$(git diff --cached --name-only --diff-filter=ACMR | grep -Ei '\.(xlsx|xlsm|xls|csv)$' \
+  | grep -v '^data/exemplo/')
+
+if [ -n "$bloqueados$planilhas" ]; then
+  echo ""
+  echo "COMMIT BLOQUEADO: arquivos que podem conter dados reais:"
+  [ -n "$bloqueados" ] && echo "$bloqueados"
+  [ -n "$planilhas" ] && echo "$planilhas"
+  echo ""
+  echo "Remova do stage com:  git rm --cached <arquivo>"
+  exit 1
+fi
+exit 0
