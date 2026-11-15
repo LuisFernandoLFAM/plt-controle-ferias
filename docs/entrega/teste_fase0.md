@@ -56,7 +56,7 @@ Confira se os dois clientes continuam na lista.
    - `ferias_espelho.xlsx`: uma cópia dos dados para consulta no Excel.
    - a pasta `backups`: cópias de segurança automáticas.
 2. Abra o `ferias_espelho.xlsx` no Excel. A primeira aba se chama "Leia-me". A aba "cliente" mostra os dois clientes.
-3. Feche o Excel antes de voltar ao app.
+3. Feche o Excel antes de usar o app. Com o Excel aberto, o app grava os dados normalmente, mas só atualiza o arquivo do Excel na próxima gravação.
 
 O Excel espelho é só para consulta. O app refaz esse arquivo a cada alteração, então o que for mudado nele à mão se perde.
 

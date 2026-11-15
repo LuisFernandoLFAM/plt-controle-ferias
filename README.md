@@ -83,7 +83,7 @@ Dados reais nunca entram no repositório:
 ## Roadmap
 
 - [x] Modelo de dados inicial e análise da planilha original
-- [ ] Fase 0: base técnica (banco no navegador, build em arquivo único)
+- [x] Fase 0: base técnica (banco no navegador, build em arquivo único)
 - [ ] Fase 1: cadastro de funcionários, times, limites e substitutos
 - [ ] Fase 2: importação do relatório da contabilidade e da programação
 - [ ] Fase 3: programação de férias com regras da CLT e prazos de aviso e pagamento
