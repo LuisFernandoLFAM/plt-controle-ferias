@@ -1,0 +1,21 @@
+# Fim de linha: o repositório guarda LF. No Windows, o Git pode converter
+# os arquivos de texto comuns para CRLF ao baixar (core.autocrlf).
+* text=auto
+
+# Bibliotecas de terceiros: bytes exatos, sem conversão.
+# O SHA-256 de cada arquivo está em vendor/VERSOES.md.
+vendor/** -text
+
+# Hooks e scripts rodam no sh: sempre LF, mesmo no Windows.
+.githooks/* text eol=lf
+*.sh text eol=lf
+
+# Binários
+*.wasm binary
+*.xlsx binary
+*.xls binary
+*.sqlite binary
+*.db binary
+*.png binary
+*.jpg binary
+*.zip binary
