@@ -50,7 +50,6 @@ vendor/         bibliotecas de terceiros, com versão registrada
 sql/migracoes/  modelo de dados em migrações numeradas (001, 002...)
 scripts/        build, dados fictícios e código de referência
 tests/          testes automáticos
-config/         configuração de exemplo
 data/exemplo/   planilha e cadastro fictícios
 docs/           decisões, specs e guias de entrega
 privado/        dados reais: ignorado pelo Git

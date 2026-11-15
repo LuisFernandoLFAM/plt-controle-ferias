@@ -10,4 +10,4 @@ Esta pasta guarda os dados reais do projeto:
 - O banco de dados real (`.sqlite`) e as cópias de segurança dele.
 - Configurações com nomes reais de clientes, centros de custo e times.
 
-Nada desta pasta deve ser copiado para arquivos versionados. Para exemplos e testes, use `data/exemplo/` e `config/regras_iniciais.exemplo.json`.
+Nada desta pasta deve ser copiado para arquivos versionados. Para exemplos e testes, use só os dados fictícios de `data/exemplo/`.

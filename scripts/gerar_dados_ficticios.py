@@ -42,7 +42,7 @@ TIMES = [("CC 100", "Fiscalização", 6), ("CC 100", "Suprimentos e Orçamentár
          ("CC 210", "Operacional", 4), ("CC 305", "Externa", 4), ("CC 305", "Interna", 2),
          ("CC 410", "Externa", 2)]
 
-# Cadastro do app (fictício). Clientes e limites partem de config/regras_iniciais.exemplo.json.
+# Cadastro do app (fictício): clientes, municípios, limites e tolerâncias dos times.
 CLIENTES_POR_CC = {
     "CC 100": ("Cliente Alfa (Energia)", "Cidade Exemplo A", "SP"),
     "CC 210": ("Cliente Beta (Logística)", "Cidade Exemplo B", "MG"),

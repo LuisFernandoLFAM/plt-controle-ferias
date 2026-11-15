@@ -1,8 +1,9 @@
 """
 Carga inicial: Planilha de Férias (Excel) -> banco SQLite (ferias.db)
 
-Uso (dados fictícios, padrão):
-    python src/ingestao/carga_inicial.py
+CÓDIGO ANTIGO, SÓ PARA CONSULTA. O app atual não usa este script (D18, D28).
+Ele usa o esquema antigo (scripts/referencia/schema_v0.sql) e exige um arquivo
+de configuração em --config, no formato antigo, que não existe mais no repositório.
 
 Uso (dados reais, tudo dentro de privado/):
     python src/ingestao/carga_inicial.py --planilha "privado/Planilha_Férias.xlsx" \
@@ -128,9 +129,9 @@ def inicio_vedado(inicio, feriados, dia_dsr=6):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--planilha", default=str(RAIZ / "data/exemplo/planilha_ferias_ficticia.xlsx"))
-    ap.add_argument("--config", default=str(RAIZ / "config/regras_iniciais.exemplo.json"))
+    ap.add_argument("--config", required=True)
     ap.add_argument("--banco", default=str(RAIZ / "data/ferias_exemplo.db"))
-    ap.add_argument("--schema", default=str(RAIZ / "sql/schema.sql"))
+    ap.add_argument("--schema", default=str(RAIZ / "scripts/referencia/schema_v0.sql"))
     ap.add_argument("--hoje", default=date.today().isoformat())
     args = ap.parse_args()
 

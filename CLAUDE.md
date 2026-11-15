@@ -26,7 +26,7 @@ Se uma tarefa entrar em conflito com `docs/DECISOES.md`, pare e pergunte. Não d
 
 - O repositório é PÚBLICO. Nunca coloque nomes de funcionários, clientes ou centros de custo reais em código, testes, docs, commits ou mensagens.
 - Tudo que é real fica em `privado/` (ignorada pelo Git). Você pode LER esses arquivos quando eu pedir, mas nunca copie o conteúdo deles para arquivos versionados.
-- Para exemplos, testes e demonstrações, use apenas `data/exemplo/` e `config/regras_iniciais.exemplo.json`. Se precisar de mais casos, amplie `scripts/gerar_dados_ficticios.py`.
+- Para exemplos, testes e demonstrações, use apenas `data/exemplo/` (planilha e `cadastro_exemplo.json`). Se precisar de mais casos, amplie `scripts/gerar_dados_ficticios.py`.
 - Antes de qualquer commit, rode `git status` e confirme que nada de `privado/`, `*.db`, `*.sqlite` ou planilhas fora de `data/exemplo/` está no stage.
 - Nunca use `git add -f` nem desative o hook de pre-commit.
 - Nunca faça `git push` sem me perguntar antes.
